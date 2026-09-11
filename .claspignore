@@ -1,0 +1,6 @@
+docs/**
+.git/**
+**/*.md
+.gitignore
+.agent-key
+node_modules/**
