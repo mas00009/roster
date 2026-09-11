@@ -12,7 +12,7 @@
  * under the 9KB value cap and edits in different months never contend.
  */
 
-var VERSION = 'v1.0';
+var VERSION = 'v1.1';
 var META = 'ros:meta';
 var LEAVE = 'ros:leave';
 var MONTH = 'ros:m:';
@@ -174,6 +174,14 @@ function saveSettings(pin, settings) {
       if (v && T.test(v[0]) && T.test(v[1])) m.settings[k] = [v[0], v[1]];
     });
     if (settings && settings.team) m.settings.team = cleanName(settings.team);
+    /* Logo: a data URI (PNG/SVG/JPEG) pasted in by the manager from official brand
+       files. Kept small so meta stays well under the property size cap. */
+    if (settings && typeof settings.logo === 'string') {
+      var L = settings.logo;
+      if (L === '') delete m.settings.logo;
+      else if (/^data:image\/(png|svg\+xml|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(L) && L.length <= 6000) m.settings.logo = L;
+      else throw new Error('Logo must be a PNG, SVG, JPEG or WebP under about 4KB');
+    }
     writeMeta(m);
     return publicMeta(m);
   });

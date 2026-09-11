@@ -53,6 +53,8 @@ header .pill{background:rgba(255,255,255,.12);color:#E4E4E8}
 header .pill.mgr{background:var(--acc);color:#fff}
 .brandmark{width:34px;height:34px;border-radius:9px;background:var(--acc);display:inline-flex;align-items:center;justify-content:center;margin-right:12px;flex:none}
 .brandmark svg{width:20px;height:20px}
+.brandmark img{width:34px;height:34px;object-fit:contain;border-radius:9px;display:block}
+.brandmark.real{background:#fff}
 .brandline{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);font-weight:700}
 .bar{display:flex;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
 .bar h1{font-size:19px;line-height:1.15}
@@ -161,7 +163,7 @@ td.cov{padding:6px 4px}
 </head>
 <body>
 <header><div class="wrap bar">
-  <div style="display:flex;align-items:center"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 14c0-5 4-8 9-8s7 3 7 6-2 5-5 5-4-2-4-4 1.5-3 3.5-3"/></svg></span><div><div class="brandline">Air New Zealand</div><h1 id="teamName">Roster</h1><div class="sub" id="sub">Loading…</div></div></div>
+  <div style="display:flex;align-items:center"><span class="brandmark" id="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 14c0-5 4-8 9-8s7 3 7 6-2 5-5 5-4-2-4-4 1.5-3 3.5-3"/></svg></span><div><div class="brandline">Air New Zealand</div><h1 id="teamName">Roster</h1><div class="sub" id="sub">Loading…</div></div></div>
   <div class="spacer"></div>
   <div class="tabs" id="tabs">
     <button data-tab="roster" class="on">Roster</button>
@@ -295,6 +297,9 @@ function render() {
   if (!S.meta) return;
   document.body.classList.toggle('mgr', !!S.pin);
   $('#teamName').textContent = S.meta.settings.team || 'Roster';
+  var bm = $('#brandmark'), logo = S.meta.settings.logo;
+  if (logo && bm.dataset.logo !== logo) { bm.innerHTML = '<img src="' + logo + '" alt="">'; bm.classList.add('real'); bm.dataset.logo = logo; }
+  else if (!logo && bm.dataset.logo) { location.reload(); }
   $('#lock').innerHTML = S.pin
     ? '<span class="pill mgr"><i></i>Manager</span><button class="ghost" onclick="lockOut()">Lock</button>'
     : '<span class="pill"><i></i>Viewing</span><button onclick="askPin()">Manager sign in</button>';
@@ -470,6 +475,8 @@ function renderTeam(app) {
     (S.pin ? '<div class="row" style="margin-top:16px;justify-content:flex-end"><button class="primary" onclick="saveSettings()">Save times</button></div>' : '') + '</div></div>';
   h += '<div class="card"><div class="hd"><h2>Share</h2></div><div class="bd"><p class="muted" style="margin-top:0">Anyone with this link can see the roster and request leave. Only the manager PIN can change shifts or approve leave. On a phone, use “Add to Home Screen” to keep it as an app.</p>' +
     '<div class="row"><input id="shareUrl" readonly value="' + esc(location.origin + location.pathname) + '"><button onclick="copyLink()">Copy</button></div></div></div>';
+  if (S.pin) h += '<div class="card"><div class="hd"><h2>Logo</h2><span class="muted">Shown in the header for everyone</span></div><div class="bd"><p class="muted" style="margin-top:0">Upload the official logo from your company brand files (PNG or SVG, small, under about 4KB, a square or wide mark on transparent works best). Only use artwork you are allowed to use.</p>' +
+    '<div class="row"><input type="file" id="logoFile" accept="image/png,image/svg+xml,image/jpeg,image/webp" style="flex:1"><button class="primary" onclick="saveLogo()">Save logo</button>' + (st.logo ? '<button class="danger" onclick="clearLogo()">Remove</button>' : '') + '</div></div></div>';
   if (S.pin) h += '<div class="card"><div class="hd"><h2>Manager PIN</h2></div><div class="bd"><div class="two"><div><label>New PIN</label><input id="np1" type="password"></div><div><label>Confirm</label><input id="np2" type="password"></div></div><div class="row" style="margin-top:14px;justify-content:flex-end"><button onclick="changePin()">Change PIN</button></div></div></div>';
   app.innerHTML = h;
 }
@@ -489,6 +496,16 @@ function changePin() {
   if (a.length < 4) return toast('PIN needs at least 4 characters'); if (a !== b) return toast('PINs do not match');
   api('changePin', S.pin, a).then(function () { S.pin = a; try { localStorage.setItem('ros:pin', a); } catch (e) {} toast('PIN changed'); render(); }).catch(function (e) { toast(e.message); });
 }
+function saveLogo() {
+  var f = $('#logoFile').files[0]; if (!f) return toast('Choose a file first');
+  if (f.size > 4400) return toast('Too big. Export the logo at about 120px, or use SVG');
+  var r = new FileReader();
+  r.onload = function () {
+    api('saveSettings', S.pin, { logo: r.result }).then(function (m) { S.meta = m; render(); toast('Logo saved'); }).catch(function (e) { toast(e.message); });
+  };
+  r.readAsDataURL(f);
+}
+function clearLogo() { api('saveSettings', S.pin, { logo: '' }).then(function (m) { S.meta = m; render(); toast('Logo removed'); }).catch(function (e) { toast(e.message); }); }
 function copyLink() { var i = $('#shareUrl'); i.select(); try { navigator.clipboard.writeText(i.value); toast('Link copied'); } catch (e) { document.execCommand('copy'); toast('Link copied'); } }
 
 /* ---------- feedback ---------- */
@@ -565,7 +582,7 @@ function mockApi(fn, args) {
       case 'changePin': req(args[0]); dm.pin = String(args[1]); save(); return true;
       case 'setShifts': req(args[0]); var out = {}; args[1].forEach(function (c) { var mo = c.date.slice(0, 7); db.shifts[mo] = db.shifts[mo] || {}; var d = db.shifts[mo][c.date] || {}; if (c.code) d[c.staffId] = c.code; else delete d[c.staffId]; if (Object.keys(d).length) db.shifts[mo][c.date] = d; else delete db.shifts[mo][c.date]; out[mo] = db.shifts[mo]; }); save(); return out;
       case 'saveStaff': req(args[0]); dm.staff = args[1].map(function (s) { return { id: s.id || rid(), name: s.name }; }); save(); return pub(dm);
-      case 'saveSettings': req(args[0]); ['am', 'pm', 'pe'].forEach(function (k) { if (args[1][k]) dm.settings[k] = args[1][k]; }); if (args[1].team) dm.settings.team = args[1].team; save(); return pub(dm);
+      case 'saveSettings': req(args[0]); ['am', 'pm', 'pe'].forEach(function (k) { if (args[1][k]) dm.settings[k] = args[1][k]; }); if (args[1].team) dm.settings.team = args[1].team; if (typeof args[1].logo === 'string') { if (args[1].logo) dm.settings.logo = args[1].logo; else delete dm.settings.logo; } save(); return pub(dm);
       case 'requestLeave': db.leave.push({ id: rid(), staffId: args[0], from: args[1], to: args[2], note: args[3] || '', status: 'pending', at: '' }); save(); return db.leave;
       case 'decideLeave': req(args[0]); db.leave.forEach(function (l) { if (l.id === args[1]) l.status = args[2]; }); save(); return db.leave;
       case 'submitFeedback': db.feedback.push({ id: rid(), name: args[0], text: args[1], status: 'new', at: new Date().toISOString(), reply: '' }); save(); return db.feedback;
