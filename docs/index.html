@@ -4,25 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Roster</title>
-<meta name="theme-color" content="#F4F6F8">
+<meta name="theme-color" content="#111111">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Roster">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
 :root{
-  --bg:#F4F6F8; --panel:#FFFFFF; --line:#E1E6EB; --line2:#CBD3DB;
-  --ink:#14202B; --dim:#5B6B7A; --faint:#8C99A6;
-  --acc:#0F766E; --acc-soft:#D9F0EC;
-  --pm:#1E3A5F; --pm-ink:#FFFFFF;
-  --pe:#3B82A0; --pe-ink:#FFFFFF;
-  --am:#F5D48A; --am-ink:#5A3E00;
-  --off:#EEF1F4; --off-ink:#7B8894;
-  --lv:#E9DDF7; --lv-ink:#5B3A8A;
+  --bg:#F5F5F7; --panel:#FFFFFF; --line:#E4E4E8; --line2:#C9C9D0;
+  --ink:#111111; --dim:#5C5C66; --faint:#8E8E99;
+  --acc:#00A3AD; --acc-soft:#D6F2F3; --acc-ink:#007A82;
+  --chrome:#111111; --chrome-ink:#FFFFFF;
+  --pm:#111111; --pm-ink:#FFFFFF;
+  --pe:#00A3AD; --pe-ink:#FFFFFF;
+  --am:#E8DFF7; --am-ink:#440099;
+  --off:#EFEFF2; --off-ink:#7C7C88;
+  --lv:#FBE3EE; --lv-ink:#9B1B5A;
   --ok:#1F9D63; --warn:#D98A0B; --bad:#D2483F;
-  --radius:12px; --shadow:0 1px 2px rgba(20,32,43,.06),0 8px 24px -12px rgba(20,32,43,.18);
+  --radius:12px; --shadow:0 1px 2px rgba(17,17,17,.06),0 8px 24px -12px rgba(17,17,17,.18);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
 }
 *{box-sizing:border-box}
@@ -30,7 +31,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);-webkit-tap-highlight-c
 body{font-size:15px;line-height:1.45;padding-bottom:max(24px,env(safe-area-inset-bottom))}
 button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line2);background:var(--panel);border-radius:9px;padding:7px 12px}
 button:hover{border-color:var(--acc)}
-button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button.primary{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
 button.primary:hover{filter:brightness(1.05)}
 button.ghost{border-color:transparent;background:transparent;color:var(--dim)}
 button.ghost:hover{background:var(--off)}
@@ -41,10 +42,21 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--acc-soft);border
 label{display:block;font-size:12px;font-weight:600;color:var(--dim);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em}
 h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
-header{position:sticky;top:0;z-index:20;background:rgba(244,246,248,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:20;background:var(--chrome);color:var(--chrome-ink);border-bottom:3px solid var(--acc)}
+header .sub{color:#A9A9B3}
+header .tabs{background:rgba(255,255,255,.1)}
+header .tabs button{color:#C9C9D0}
+header .tabs button.on{background:#fff;color:var(--ink)}
+header button{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+header button:hover{border-color:var(--acc)}
+header .pill{background:rgba(255,255,255,.12);color:#E4E4E8}
+header .pill.mgr{background:var(--acc);color:#fff}
+.brandmark{width:34px;height:34px;border-radius:9px;background:var(--acc);display:inline-flex;align-items:center;justify-content:center;margin-right:12px;flex:none}
+.brandmark svg{width:20px;height:20px}
+.brandline{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);font-weight:700}
 .bar{display:flex;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
-.bar h1{font-size:20px}
-.bar .sub{font-size:12px;color:var(--faint)}
+.bar h1{font-size:19px;line-height:1.15}
+.bar .sub{font-size:12px}
 .spacer{flex:1}
 .tabs{display:flex;gap:2px;background:var(--off);padding:3px;border-radius:10px}
 .tabs button{border:0;background:transparent;padding:6px 14px;border-radius:8px;color:var(--dim);font-weight:600}
@@ -64,7 +76,7 @@ main{padding-top:16px}
 .seg{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden}
 .seg button{border:0;border-radius:0;padding:6px 10px;font-size:13px;color:var(--dim)}
 .seg button+button{border-left:1px solid var(--line2)}
-.seg button.on{background:var(--ink);color:#fff}
+.seg button.on{background:var(--acc);color:#fff}
 
 /* grid */
 .gridwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -74,7 +86,7 @@ table.grid{border-collapse:separate;border-spacing:0;min-width:100%}
 .grid th.name,.grid td.name{position:sticky;left:0;background:#fff;text-align:left;padding:8px 14px;min-width:132px;z-index:2;border-right:1px solid var(--line);font-weight:600}
 .grid th.name{background:#FAFBFC;z-index:3}
 .grid th .d{display:block;font-size:17px;color:var(--ink);font-weight:700;letter-spacing:-.02em}
-.grid th.today .d{color:var(--acc)}
+.grid th.today .d{color:var(--acc-ink)}
 .grid th.today{box-shadow:inset 0 -3px 0 var(--acc)}
 .grid th.we{color:var(--faint)}
 .grid td.cell{min-width:78px;height:56px;padding:5px 4px;position:relative}
@@ -144,12 +156,12 @@ td.cov{padding:6px 4px}
 .modal{position:fixed;inset:0;background:rgba(20,32,43,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
 .modal .card{width:100%;max-width:380px}
 .hidden{display:none!important}
-.avatar{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--acc-soft);color:var(--acc);font-size:12px;font-weight:700;align-items:center;justify-content:center;margin-right:8px;flex:none}
+.avatar{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:700;align-items:center;justify-content:center;margin-right:8px;flex:none}
 </style>
 </head>
 <body>
 <header><div class="wrap bar">
-  <div><h1 id="teamName">Roster</h1><div class="sub" id="sub">Loading…</div></div>
+  <div style="display:flex;align-items:center"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 14c0-5 4-8 9-8s7 3 7 6-2 5-5 5-4-2-4-4 1.5-3 3.5-3"/></svg></span><div><div class="brandline">Air New Zealand</div><h1 id="teamName">Roster</h1><div class="sub" id="sub">Loading…</div></div></div>
   <div class="spacer"></div>
   <div class="tabs" id="tabs">
     <button data-tab="roster" class="on">Roster</button>
